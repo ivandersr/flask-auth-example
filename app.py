@@ -90,6 +90,9 @@ def update_user(user_id):
 @login_required
 def delete_user(user_id):
     user = User.query.get(user_id)
+    
+    if user_id == current_user.id:
+        return jsonify({"message": "Você não pode excluir o usuário atual"}), 403
 
     if user:
         db.session.delete(user)
