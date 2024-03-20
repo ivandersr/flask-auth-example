@@ -53,7 +53,7 @@ def create_user():
         if existing_user:
             return jsonify({"message": "Nome de usuário não disponível"}), 400
         
-        new_user = User(username=username, password=password)
+        new_user = User(username=username, password=password, role="user")
         db.session.add(new_user)
         db.session.commit()
 
@@ -74,6 +74,9 @@ def find_user(user_id):
 def update_user(user_id):
     data = request.json
     password = data.get("password")
+    
+    if user_id != current_user.id and current_user.role == "user":
+        return jsonify({"message": "Operação não permitida"}), 403
 
     if password:
         user = User.query.get(user_id)
@@ -90,6 +93,9 @@ def update_user(user_id):
 @login_required
 def delete_user(user_id):
     user = User.query.get(user_id)
+
+    if current_user.role != "admin":
+        return jsonify({"message": "Oeração não permitida"}), 403
     
     if user_id == current_user.id:
         return jsonify({"message": "Você não pode excluir o usuário atual"}), 403
